@@ -1,0 +1,19 @@
+{
+    "name": "victorwesterlund/functionflags",
+    "description": "An attempt to tame PHP constants for use as function/method flags",
+    "type": "library",
+    "license": "GPL-3.0-only",
+    "authors": [
+        {
+            "name": "Victor Westerlund",
+            "email": "victor.vesterlund@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "FunctionFlags\\": "src/FunctionFlags/"
+        }
+    },
+    "require": {}
+}
