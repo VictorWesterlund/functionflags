@@ -125,7 +125,6 @@
 
         // Check if flag is set within instance scope
         private function inst_isset(int $flag): bool|null {
-            $test = $this::static_isset($flag);
             // Filter flags that belong to this scope
             return in_array($this::static_isset($flag), $this->flags);
         }
