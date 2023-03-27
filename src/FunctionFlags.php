@@ -34,7 +34,8 @@
             // Get args array from stack entry by index
             $args = $stack[$idx]["args"];
 
-            return !empty($args) ? end($args) : null;
+            // Return null if no arguments provided or not a valid int flag
+            return !empty($args) && is_int(end($args)) ? end($args) : null;
         }
 
         /* ---- */
