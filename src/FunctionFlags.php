@@ -1,7 +1,7 @@
 <?php
 
 		namespace FunctionFlags;
-
+    
     class FunctionFlags {
         // Limit value for debug_backtrace()
         private static $trace_limit = 5;
