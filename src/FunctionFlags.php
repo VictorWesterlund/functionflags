@@ -1,10 +1,11 @@
 <?php
 
-	namespace FunctionFlags;
+    namespace FunctionFlags;
     
     class FunctionFlags {
-        // Limit value for debug_backtrace()
-        private static $trace_limit = 5;
+        // Limit debug_backtrace() to this amout of stack entries when trying to locate the
+        // first occurance of this class. Set to 0 for unlimited.
+        public static $BACKTRACE_LIMIT = 5;
 
         // Methods by name that can be called statically
         private static $static_public_whitelist = [
@@ -76,13 +77,16 @@
         // Get flags from caller closest to this method on the call stack
         private static function get_flags_from_caller(): int|null {
             // Get call stack in reverse order
-            $stack = array_reverse(debug_backtrace(0, (__CLASS__)::$trace_limit));
+            $stack = array_reverse(debug_backtrace(0, (__CLASS__)::$BACKTRACE_LIMIT));
 
-            // Find first occurance of this class name in callstack
+            // Find first occurance of this class name in call stack
             $idx = array_search(__CLASS__, array_column($stack, "class"));
-            // Failed to locate this class in a full backtrace
+            // Failed to locate this class
             if ($idx === false) {
-                throw new Exception("Failed to retrieve flags from initator callable");
+                throw new Exception("Failed to retrieve flags from initator callable; Perhaps increase FunctionFlags::\$BACKTRACE_LIMIT");
+            } elseif ($idx === 0) {
+                // No parent callable. Method was probably called on its own
+                return null;
             }
 
             // Get args array from initial caller by simply stepping back one entry in the reverse array
@@ -95,14 +99,30 @@
         /* ---- */
 
         // Define new constants
-        private static function static_define(string|array $flags) {
+        private static function static_define(string|array $flags): array {
             // Convert to array
             $flags = is_array($flags) ? $flags : [$flags];
 
+            $reserved = [];
+
             // Define constant for each flag with unique address
             foreach ($flags as $flag) {
-                define($flag, (__CLASS__)::addr_reserve());
+                // Constant already defined with that name
+                if (defined($flag)) {
+                    // Pass existing address
+                    $reserved[] = constant($flag);
+                    continue;
+                }
+
+                // Reserve new address
+                $addr = (__CLASS__)::addr_reserve();
+                $reserved[] = $addr;
+
+                define($flag, $addr);
             }
+
+            // Return reserved addresses
+            return $reserved;
         }
 
         // Check if a flag is set with bitwise AND of all flags
@@ -117,15 +137,17 @@
             // Convert to array
             $flags = is_array($flags) ? $flags : [$flags];
 
-            // Define constants
-            $this::static_define($flags);
             // Append flag(s) to instance memory
-            $this->flags = array_merge($this->flags, $flags);
+            $this->flags = array_merge($this->flags, $this::static_define($flags));
         }
 
         // Check if flag is set within instance scope
         private function inst_isset(int $flag): bool|null {
+            if (!in_array($flag, $this->flags)) {
+                return false;
+            }
+
             // Filter flags that belong to this scope
-            return in_array($this::static_isset($flag), $this->flags);
+            return $this::static_isset($flag);
         }
     }
