@@ -126,13 +126,14 @@
         }
 
         // Check if a flag is set with bitwise AND of all flags
-        private static function static_isset(int $flag): bool|null {
+        private static function static_isset(int $flag): bool {
             $flags = (__CLASS__)::get_flags_from_caller();
-            return $flags ? $flags & $flag : null;
+            return $flags ? $flags & $flag : false;
         }
 
         /* ---- */
 
+        // Define flag(s) for $this instance
         private function inst_define(string|array $flags) {
             // Convert to array
             $flags = is_array($flags) ? $flags : [$flags];
@@ -141,8 +142,9 @@
             $this->flags = array_merge($this->flags, $this::static_define($flags));
         }
 
-        // Check if flag is set within instance scope
-        private function inst_isset(int $flag): bool|null {
+        // Check if flag is set and within $this scope
+        private function inst_isset(int $flag): bool {
+            // Return false if the flag is not in scope of $this instance
             if (!in_array($flag, $this->flags)) {
                 return false;
             }
