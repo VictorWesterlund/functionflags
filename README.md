@@ -27,17 +27,17 @@ Flags can also be scoped to a class by creating a new `FunctionFlags` instance. 
 ```php
 use FunctionFlags/FunctionFlags
 
-$my_flag = new FunctionFlags("MY_FLAG");
-$other_flag = new FunctionFlags("OTHER_FLAG");
+$flags1 = new FunctionFlags(["FOO", "BAR"]);
+$flags2 = new FunctionFlags(["BAR", "BIZ"]);
 
-// Returns true if MY_FLAG is passed and present in $my_flag
+// Returns true if FOO is passed and present in $flags1
 function foo(int $flags = null): bool {
-  return $my_flag->isset(MY_FLAG);
+  return $flags2->isset(FOO);
 }
 
-foo(MY_FLAG); // true
-foo(OTHER_FLAG|MY_FLAG); // true
-foo(OTHER_FLAG); // false
+foo(FOO); // true
+foo(FOO|BIZ); // true
+foo(BIZ); // false
 foo(); // false
 ```
 
